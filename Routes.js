@@ -1,5 +1,6 @@
 const db = require('dotenv').config()
 const jwtVerify = require('./jwtVerify')
+// console.log(db)
 // const cookie = require('cookie')
 module.exports = (endpoints, knex, jwt) => {
     endpoints.get('/get', jwtVerify, (req, res)=>{
@@ -73,7 +74,7 @@ module.exports = (endpoints, knex, jwt) => {
           .then(() => {
               knex('todo')
                 .where('todo.userId', userId)
-                .then(data => res.send(data))
+                .then(data => {res.send(data)})
                 .catch(err => console.log(err.message))
           })
           .catch((err) => console.log(err.message))
@@ -117,13 +118,13 @@ module.exports = (endpoints, knex, jwt) => {
     })
 
     endpoints.post('/login', (req, res)=>{
-      // console.log(req.body)
+      console.log('this is ', req.body)
       knex('user')
         .where("user.email", req.body.email)
         .andWhere("user.password", req.body.password)
       .then((data) => {
         if(data.length>0){
-            jwt.sign(data[0], process.env.secret, function(err, token) {
+            jwt.sign(JSON.stringify(data[0]), process.env.secret, function(err, token) {
             if(!err){
                   res.send(token)
             }

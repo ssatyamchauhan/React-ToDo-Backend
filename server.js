@@ -1,16 +1,11 @@
 var express = require('express')
 var app = express()
 const jwt = require('jsonwebtoken');
+const config = require('./config')
 
-// app.use(express.limit(100000000))
-var knex = require('knex')({
-    client:"sqlite3",
-    connection:
-    {
-        filename:"./todo"
-    },
-    useNullAsDefault:true
-})
+
+
+var knex = require('knex')({client:'mysql',connection:config.key});
 
 knex.schema.hasTable('todo').then(function(exists) {
     if (!exists) {

@@ -1,7 +1,6 @@
 const db = require('dotenv').config()
 const jwtVerify = require('./jwtVerify')
-// console.log(db)
-// const cookie = require('cookie')
+
 module.exports = (endpoints, knex, jwt) => {
     endpoints.get('/get', jwtVerify, (req, res)=>{
         jwt.verify(req.token, process.env.secret, function(err, decoded) {
@@ -112,10 +111,10 @@ module.exports = (endpoints, knex, jwt) => {
       .catch((err) => console.log('this data is already exists!'))
 
     })
-    endpoints.get('/logout', jwtVerify, (req, res)=>{
-      res.clearCookie(req.token);
-      res.json('logged out successfully!')
-    })
+    // endpoints.get('/logout', jwtVerify, (req, res)=>{
+    //   res.clearCookie(req.token);
+    //   res.json('logged out successfully!')
+    // })
 
     endpoints.post('/login', (req, res)=>{
       console.log('this is ', req.body)

@@ -3,6 +3,9 @@ var app = express()
 const jwt = require('jsonwebtoken');
 const config = require('./config')
 
+var cors = require('cors')
+app.use(cors())
+
 
 
 var knex = require('knex')({client:'mysql',connection:config.key});
@@ -28,13 +31,15 @@ knex.schema.hasTable('user').then(function(exists) {
   }
 });
 
+
+
 app.use(express.json())
-app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE")
-	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	next();
-  });
+ app.use((req, res, next) => {
+ 	res.header("Access-Control-Allow-Origin", "*");
+ 	res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE")
+ 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+ 	next();
+   });
 
 
 var endpoints = express.Router();

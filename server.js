@@ -2,11 +2,15 @@ var express = require('express')
 var app = express()
 const jwt = require('jsonwebtoken');
 const config = require('./config')
-
+let cookieParser = require('cookie-parser'); 
 var cors = require('cors')
-app.use(cors())
 
+app.use(cors({
+  credentials: true,
+  origin: 'http://localhost:5000',
+}));
 
+app.use(cookieParser())
 
 var knex = require('knex')({client:'mysql',connection:config.key});
 
@@ -26,7 +30,7 @@ knex.schema.hasTable('user').then(function(exists) {
     return knex.schema.createTable('user', function(t) {
       t.increments('id').primary();
       t.string('email').unique().notNullable();
-      t.string('password').notNullable();
+      t.string('password');
     });
   }
 });
@@ -34,10 +38,11 @@ knex.schema.hasTable('user').then(function(exists) {
 
 
 app.use(express.json())
+
  app.use((req, res, next) => {
- 	res.header("Access-Control-Allow-Origin", "*");
- 	res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE")
- 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE")
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
  	next();
    });
 
@@ -45,7 +50,6 @@ app.use(express.json())
 var endpoints = express.Router();
 app.use('/',endpoints);
 require('./Routes')(endpoints,knex,jwt)
-
   
 app.listen(2000,()=>{
 	console.log('You app is listening on Port',2000)

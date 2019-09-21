@@ -1,26 +1,22 @@
 const db = require('dotenv').config()
 const jwtVerify = require('./jwtVerify')
+const forget = require('./forget')
 
 module.exports = (endpoints, knex, jwt) => {
     endpoints.get('/get', jwtVerify, (req, res)=>{
-        jwt.verify(req.token, process.env.secret, function(err, decoded) {
-          if(!err){
-            var userId = decoded.id
+            var userId = req.userId
+            console.log(userId)
             knex
             .select("*")
             .from('todo')
             .where('userId', userId)
             .then(data => {return res.json(data)})
             .catch(err => console.log(err.message))
-          }
-          else{console.log(err);res.json('token is not valid')}
-        });
     })
     endpoints.post('/newData', jwtVerify, (req, res)=>{
       var data = {done:req.body.done, text:req.body.text};
-      jwt.verify(req.token, process.env.secret, (err, decode)=>{
-        if(!err){
-          data["userId"] = decode.id;
+          data["userId"] = req.userId;
+          console.log(data)
           knex('todo')
           .insert(data)
           .then(() => {
@@ -30,18 +26,11 @@ module.exports = (endpoints, knex, jwt) => {
                 .catch(err => console.log(err.message))
           })
           .catch((err) => console.log(err.message))
-        }
-        else{
-          console.log(err);res.json('token is not valid')
-        }
-      })    
-    })  
+      })  
     endpoints.put('/edit/:id', jwtVerify, (req, res)=>{
       // var id = parseInt(req.params.id)+1;
       console.log('original', req.params.id)
-      jwt.verify(req.token, process.env.secret, function(err,decode){
-          if(!err){
-            var userId = decode.id
+            var userId = req.userId;
             knex('todo')
               .where('todo.id', req.params.id)
               .update({"text":req.body.text})
@@ -54,40 +43,28 @@ module.exports = (endpoints, knex, jwt) => {
             .catch((err)=>{console.log(err.message)
               
               })
-          }
-          else{
-            res.json('token is not valid')
-          }
-      })  
       
     })
     endpoints.put('/done/:id', jwtVerify, (req, res) =>{
-      console.log(req.params.id)
-      jwt.verify(req.token, process.env.secret, (err, decode) =>{
-        if(!err){
-          var userId = decode.id
+      // console.log(req.params.id)
+
+          var userId = req.userId;
           knex('todo')
             .where("todo.id", req.params.id)
             .andWhere('todo.userId', userId)
             .update({done:req.body.done})
           .then(() => {
+            console.log('then')
               knex('todo')
                 .where('todo.userId', userId)
                 .then(data => {res.send(data)})
                 .catch(err => console.log(err.message))
           })
           .catch((err) => console.log(err.message))
-        }
-        else{
-          res.json('token is not valid')
-        }
-      })
       
     })
     endpoints.delete('/delete/:id', jwtVerify, (req, res) =>{
-      jwt.verify(req.token, process.env.secret, (err, decode) =>{
-        if(!err){
-          var userId = decode.id;
+          var userId = req.userId;
           console.log('jwt verified')
           knex('todo')
             .where('todo.id', req.params.id)
@@ -99,41 +76,82 @@ module.exports = (endpoints, knex, jwt) => {
               .catch(err => console.log(err.message))
           })
           .catch(err => console.log(err))
-        }
-        else{
-          res.json('token is not valid')
-        }
-    })
   })
     endpoints.post('/signup', (req, res)=>{
+      console.log('this is request body',req.body)
       knex('user').insert(req.body)
       .then(() => res.json('signup successfully!'))
-      .catch((err) => console.log('this data is already exists!'))
-
+      .catch((err) => res.json('Error'))
     })
-    // endpoints.get('/logout', jwtVerify, (req, res)=>{
-    //   res.clearCookie(req.token);
-    //   res.json('logged out successfully!')
-    // })
 
-    endpoints.post('/login', (req, res)=>{
-      console.log('this is ', req.body)
+  
+    endpoints.post('/login', (req,resp)=>{
+      // console.log('this is ', req.body)
       knex('user')
         .where("user.email", req.body.email)
         .andWhere("user.password", req.body.password)
       .then((data) => {
         if(data.length>0){
-            jwt.sign(JSON.stringify(data[0]), process.env.secret, function(err, token) {
+            jwt.sign({user:data[0]}, process.env.secret, {expiresIn: '5m'}, function(err, token) {
             if(!err){
-                  res.send(token)
+                return resp.send(token+' '+'manual')
             }
-            else{console.log(err)}
+            else{
+              console.log('here is the error',err)
+            }
        });
       }
       else{
-        res.json('data is not exists!')
+        resp.json('data is not exists!')
       }
     })
       .catch((err) => console.log(err.message))
+    })
+    endpoints.post('/googleSign', (req,res) => {
+        if(req.body.id_token){
+          return res.send(req.body.id_token)
+        }      
+        else{
+          res.json('data does not exists')
+        }
+    })
+
+    endpoints.get('/logout', jwtVerify, (req, res)=>{
+      res.clearCookie(req.token);
+      res.json('logged out successfully!')
+    })
+
+    endpoints.post('/forget',(req,res) => {
+      console.log('forget is called')
+      console.log(req.body)
+        knex('user').where('user.email',req.body.email)
+        .then(data => {
+          console.log(data)
+          if(data.length === 1){
+              jwt.sign({user:data[0]}, process.env.secret, {expiresIn: '5m'}, function(err, token) {
+                if(!err){
+                  console.log(token)
+                  forget(req,res,token)
+                }
+                else{
+                  console.log('here is the error',err)
+                }
+              })
+                
+          }
+          else{
+            console.log('else')
+            res.json('You are not a existence user!')
+          }
+        })
+    })
+
+    endpoints.post('/reset', jwtVerify , (req,res) =>{
+      console.log('it is in process.......')
+      var userId = req.userId;
+      knex('user').where('user.id',userId).update({password:req.body.password})
+      .then(data => res.json(data))
+      .catch(err => res.json(err))
+      
     })
 }

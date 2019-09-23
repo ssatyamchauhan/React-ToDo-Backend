@@ -46,7 +46,8 @@ module.exports = function verification(req,res,next){
                 var clientId = '673375738955-hio20gpguhrdlddbdl8a60da9de4qc9j.apps.googleusercontent.com';
                 // console.log(token)
                 verifier.verify(token, clientId, function (err, tokenInfo) {
-                    // console.log(tokenInfo)
+                    console.log('this is info',tokenInfo)
+                    var info = tokenInfo
                     if (!err) {
                         console.log('===========================================')
                         knex.select('id').where('email', tokenInfo.email).from('user')
@@ -67,6 +68,8 @@ module.exports = function verification(req,res,next){
                             // console.log(data)
                             console.log('this is the original data',data[0].id)
                             req.userId=data[0].id;
+                            req.picture=tokenInfo.picture
+
                             next()
                             }
                         })

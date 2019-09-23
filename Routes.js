@@ -154,4 +154,13 @@ module.exports = (endpoints, knex, jwt) => {
       .catch(err => res.json(err))
       
     })
+
+    endpoints.post('/profile', jwtVerify , (req,res) => {
+      console.log('this is profile endpoints')
+      var userId=req.userId
+      console.log(req.picture, 'here it is ',userId)
+      knex('user').where('user.id',userId)
+      .then(data => {console.log(data);res.send({name:'satyam',email:data[0].email,image:req.picture})})
+      .catch(err => res.send(err))
+    })
 }

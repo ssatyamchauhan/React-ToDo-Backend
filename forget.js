@@ -21,7 +21,7 @@ module.exports = function mailer(req,res,token,next){
     }
 
     transporter.sendMail(mailOptions,(err,result)=>{
-        if(!err){res.send(result);next()}
+        if(!err){res.send(result)}
         else{res.send(err);next()}
     })
 

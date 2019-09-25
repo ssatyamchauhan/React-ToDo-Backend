@@ -6,12 +6,12 @@ Hey, In this I have implemented an api in which i have performed CRUD operation 
 Express is a perfect choice for a server when it comes to create and exposing api(REST full API) to communicate as a client with your server application.
 
 ## Requirements
-if you are a linux user:/n
-All you need to installed node and git in your system. /n
-To install run command ```sudo apt-get install nodejs```/n
-To install run command ```sudo apt-get install git```/n
-And it is done./n
-Now Run the following command : /n
+if you are a linux user:<br>
+All you need to installed node and git in your system. <br>
+To install run command ```sudo apt-get install nodejs```<br>
+To install run command ```sudo apt-get install git```<br>
+And it is done.<br>
+Now Run the following command : <br>
 ```
 git clone https://github.com/ssatyamchauhan/React-ToDo-Backend.git
 cd /yourprojectdirectory

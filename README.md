@@ -8,8 +8,8 @@ Express is a perfect choice for a server when it comes to create and exposing ap
 ## Requirements
 if you are a linux user:<br>
 All you need to installed node and git in your system. <br>
-To install run command ```sudo apt-get install nodejs```<br>
-To install run command ```sudo apt-get install git```<br>
+To install node run command ```sudo apt-get install nodejs```<br>
+To install git run command ```sudo apt-get install git```<br>
 And it is done.<br>
 Now Run the following command : <br>
 ```
